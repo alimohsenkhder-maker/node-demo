@@ -8,20 +8,26 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: "18"
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
 
-    - name: Install dependencies
-      run: npm install
+      - name: Install dependencies
+        run: npm install
 
-    - name: Run the app (test run)
-      run: node server.js &
+      - name: Start server in background
+        run: |
+          node server.js &
+          sleep 3
+
+      - name: Test server is running
+        run: curl http://localhost:3000
+
+      - name: Stop Node server
+        run: pkill node
