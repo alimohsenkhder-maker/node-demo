@@ -1,0 +1,34 @@
+name: CD - Deploy Node.js App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
+        uses: webfactory/ssh-agent@v0.8.1
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~
+            docker stop ${{ secrets.APP_NAME }} || true
+            docker rm ${{ secrets.APP_NAME }} || true
+            docker pull YOUR_DOCKER_IMAGE || true
+            docker build -t ${{ secrets.APP_NAME }} .
+            docker run -d -p 80:3000 --name ${{ secrets.APP_NAME }} ${{ secrets.APP_NAME }}
+
